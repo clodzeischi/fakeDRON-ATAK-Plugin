@@ -4,6 +4,11 @@
     <string name="app_name">fakeDRON</string>
     <!-- description -->
     <string name="app_desc">This plugin spawns a virtual drone on the map and lets the user control it for testing purposes.</string>
-
+    <string name="label_btn_takeoff">Take-off</string>
+    <string name="label_btn_rtl">Return to launch</string>
+    <string name="label_btn_land">Land</string>
+    <string name="label_inx_altitude">Altitude</string>
+    <string name="label_inx_state">State</string>
+    <string name="label_sldr_altitude">Target altitude</string>
 
 </resources>
