@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">fakeDRON</string>
+    <!-- description -->
+    <string name="app_desc">This plugin spawns a virtual drone on the map and lets the user control it for testing purposes.</string>
+
+
+</resources>

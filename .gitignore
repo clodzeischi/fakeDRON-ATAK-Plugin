@@ -1,0 +1,116 @@
+# ============================================================
+# Android Studio / IntelliJ IDEA
+# ============================================================
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+.idea/vcs.xml
+.idea/navEditor.xml
+.idea/deploymentTargetDropDown.xml
+.idea/kotlinc.xml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# ============================================================
+# Gradle
+# ============================================================
+.gradle/
+build/
+**/build/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+.gradletasknamecache
+
+# ============================================================
+# Local / Sensitive Configuration
+# ============================================================
+local.properties
+keystore.properties
+
+# Signing keystores — never commit private keys
+*.jks
+*.keystore
+android_keystore
+
+# ============================================================
+# Android Generated / Compiled
+# ============================================================
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+gen/
+out/
+
+# ============================================================
+# Kotlin
+# ============================================================
+*.kotlin_module
+.kotlin/
+
+# ============================================================
+# Java
+# ============================================================
+*.jar
+# Exception: keep gradle wrapper and any hand-managed libs
+!gradle/wrapper/gradle-wrapper.jar
+!libs/*.jar
+
+# ============================================================
+# OS Artifacts
+# ============================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+
+# ============================================================
+# Logs & Temp Files
+# ============================================================
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ============================================================
+# ProGuard / R8
+# ============================================================
+proguard/
+*.pro.bak
+
+# ============================================================
+# NDK / CMake (if you add native code later)
+# ============================================================
+.externalNativeBuild/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
