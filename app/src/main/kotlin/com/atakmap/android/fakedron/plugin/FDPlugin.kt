@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.atak.plugins.impl.PluginContextProvider
 import com.atak.plugins.impl.PluginLayoutInflater
+import com.atakmap.android.fakedron.plugin.drone.DroneControlView
+import com.atakmap.android.fakedron.plugin.drone.DroneViewModel
 import gov.tak.api.commons.graphics.Bitmap
 import gov.tak.api.plugin.IPlugin
 import gov.tak.api.plugin.IServiceController
@@ -13,25 +15,29 @@ import gov.tak.api.ui.PaneBuilder
 import gov.tak.api.ui.ToolbarItem
 import gov.tak.api.ui.ToolbarItemAdapter
 import gov.tak.platform.marshal.MarshalManager
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 
 class FDPlugin(serviceController: IServiceController) : IPlugin {
     var serviceController: IServiceController?
     var pluginContext: Context? = null
     var uiService: IHostUIService?
     var toolbarItem: ToolbarItem?
-    var templatePane: Pane? = null
+    var pluginPane: Pane? = null
+    private val viewModel = DroneViewModel()
+    private val pluginScope = MainScope()
 
     init {
         this.serviceController = serviceController
         val ctxProvider = serviceController
-            .getService<PluginContextProvider?>(PluginContextProvider::class.java)
+            .getService(PluginContextProvider::class.java)
         if (ctxProvider != null) {
             pluginContext = ctxProvider.getPluginContext()
             pluginContext!!.setTheme(R.style.ATAKPluginTheme)
         }
 
         // obtain the UI service
-        uiService = serviceController.getService<IHostUIService?>(IHostUIService::class.java)
+        uiService = serviceController.getService(IHostUIService::class.java)
 
         // initialize the toolbar button for the plugin
 
@@ -40,7 +46,7 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
         // be able to find it again after the user moves the icon.
         toolbarItem = ToolbarItem.Builder(
             pluginContext!!.getString(R.string.app_name),
-            MarshalManager.marshal<Bitmap?, Drawable?>(
+            MarshalManager.marshal(
                 pluginContext!!.getResources().getDrawable(R.drawable.icon_drone),
                 Drawable::class.java,
                 Bitmap::class.java
@@ -66,37 +72,39 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
         if (uiService == null) return
 
         uiService!!.removeToolbarItem(toolbarItem)
+        pluginScope.cancel()
     }
 
     private fun showPane() {
         // instantiate the plugin view if necessary
-        if (templatePane == null) {
+        if (pluginPane == null) {
             // Remember to use the PluginLayoutInflator if you are actually inflating a custom view
             // In this case, using it is not necessary - but I am putting it here to remind
             // developers to look at this Inflator
 
-            templatePane = PaneBuilder(
-                PluginLayoutInflater.inflate(
-                    pluginContext,
-                    R.layout.main_layout, null
-                )
-            ) // relative location is set to default; pane will switch location dependent on
-                // current orientation of device screen
-                .setMetaValue(
-                    Pane.RELATIVE_LOCATION,
-                    Pane.Location.Default
-                ) // pane will take up 40% of screen width in landscape mode
-                .setMetaValue(
-                    Pane.PREFERRED_WIDTH_RATIO,
-                    0.4
-                ) // pane will take up 40% of screen height in portrait mode
+            val view = PluginLayoutInflater.inflate(
+                pluginContext,
+                R.layout.main_layout,
+                null
+            )
+
+            pluginPane = PaneBuilder(view)
+                .setMetaValue(Pane.RELATIVE_LOCATION, Pane.Location.Default)
+                .setMetaValue(Pane.PREFERRED_WIDTH_RATIO, 0.4)
                 .setMetaValue(Pane.PREFERRED_HEIGHT_RATIO, 0.4)
                 .build()
+
+            DroneControlView(
+                context = pluginContext!!,
+                view = view,
+                viewModel = viewModel,
+                lifecycleScope = MainScope()
+            )
         }
 
         // if the plugin pane is not visible, show it!
-        if (!uiService!!.isPaneVisible(templatePane)) {
-            uiService!!.showPane(templatePane, null)
+        if (!uiService!!.isPaneVisible(pluginPane)) {
+            uiService!!.showPane(pluginPane, null)
         }
     }
 }
