@@ -16,14 +16,18 @@ class MapTargetingController(
     private val mapClickListener = MapEventDispatcher.MapEventDispatchListener { event ->
         val geoPoint = mapView.inverse(event.pointF)
         geoPoint?.let {
-            graphics.setRallyPoint(it.get())
-            onRallyPointSet(it.get())
+            val point = it.get()
+            graphics.setRallyPoint(point)
+            onRallyPointSet(point)
         }
     }
 
     fun toggle() {
         isTargeting = !isTargeting
         if (isTargeting) {
+            mapView.mapEventDispatcher.removeMapEventListener(
+                MapEvent.MAP_CLICK, mapClickListener // defensive remove before add
+            )
             mapView.mapEventDispatcher.addMapEventListener(
                 MapEvent.MAP_CLICK, mapClickListener
             )
@@ -40,6 +44,7 @@ class MapTargetingController(
             mapView.mapEventDispatcher.removeMapEventListener(
                 MapEvent.MAP_CLICK, mapClickListener
             )
+            isTargeting = false
         }
     }
 }

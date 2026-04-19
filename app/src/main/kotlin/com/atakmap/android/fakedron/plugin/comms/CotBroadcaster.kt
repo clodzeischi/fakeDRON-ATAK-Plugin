@@ -20,8 +20,6 @@ class CotBroadcaster(private val mapView: MapView) {
         const val DELETE_TYPE            = "t-x-d-d"
     }
 
-    val TAG = "CotBroadcaster"
-
     // uid is derived once from device UID — stable for lifetime of plugin
     private val uid = "fakeDRON-${mapView.selfMarker.uid}"
 
@@ -60,6 +58,11 @@ class CotBroadcaster(private val mapView: MapView) {
         speed: Double,
         course: Double
     ) {
+        val dispatcher = CotMapComponent.getExternalDispatcher()
+        if (dispatcher == null) {
+            return
+        }
+
         val now   = CoordinatedTime()
         val stale = CoordinatedTime().addMilliseconds(STALE_OFFSET_MS)
 
@@ -74,15 +77,14 @@ class CotBroadcaster(private val mapView: MapView) {
                 position.latitude,
                 position.longitude,
                 altitude.toDouble(),
-                CotPoint.UNKNOWN,   // ce — circular error unknown
-                CotPoint.UNKNOWN    // le — linear error unknown
+                CotPoint.UNKNOWN,
+                CotPoint.UNKNOWN
             ))
             detail = buildDetail(speed, course)
         }
 
-        CotMapComponent.getExternalDispatcher().dispatch(event)
+        dispatcher.dispatch(event)
 
-        // update gate trackers
         lastBroadcastTime     = System.currentTimeMillis()
         lastBroadcastPosition = position
     }
@@ -108,8 +110,6 @@ class CotBroadcaster(private val mapView: MapView) {
         }
 
         CotMapComponent.getExternalDispatcher().dispatch(event)
-
-        Log.d(TAG, "sendDeleteEvent: $event")
     }
 
     private fun buildDetail(speed: Double, course: Double): CotDetail {

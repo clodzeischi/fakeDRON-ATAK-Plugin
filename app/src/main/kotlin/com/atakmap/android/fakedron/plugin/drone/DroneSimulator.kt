@@ -72,6 +72,7 @@ class DroneSimulator(
         simulationJob   = null
         actualAltitude  = 0
         currentPosition = null
+        lastPosition    = null    // ← add this
         rallyPoint      = null
         isRTH           = false
     }
@@ -145,13 +146,12 @@ class DroneSimulator(
         if (status == FlightStatus.IDLE || status == FlightStatus.LANDING) return
 
         val last   = lastPosition
-        val course = if (last != null)
+        val dist   = if (last != null) GeoCalculations.distanceTo(last, position) else 0.0
+        val course = if (last != null && dist > 0.01)
             GeoCalculations.bearingTo(last, position)
         else 0.0
-
-        // speed = distance moved this tick / tick duration in seconds
-        val speed = if (last != null)
-            GeoCalculations.distanceTo(last, position) / (TICK_MS / 1000.0)
+        val speed  = if (last != null && dist > 0.01)
+            dist / (TICK_MS / 1000.0)
         else 0.0
 
         broadcaster.onTick(position, altitude, speed, course)

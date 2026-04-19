@@ -25,8 +25,11 @@ class MapGraphicsManager(private val mapView: MapView) {
         const val RALLY_STROKE_COLOR    = 0xFFFF6D00.toInt()
         const val RALLY_FILL_COLOR      = 0x33FF6D00.toInt()
         const val TICK_MS               = 16L    // ~60fps
+        const val DRONE_CALLSIGN = "fakeDRON-01"
+        const val DRONE_MARKER_TYPE = "a-f-A-M-F-Q"
     }
 
+    // Must be Main — map item updates require UI thread
     private val managerScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val mapGroup = mapView.rootGroup.addGroup("fakeDRON")
     private var rallyCircle: DrawingCircle? = null
@@ -56,7 +59,6 @@ class MapGraphicsManager(private val mapView: MapView) {
             strokeColor  = RALLY_STROKE_COLOR
             fillColor    = RALLY_FILL_COLOR
             strokeWeight = 2.0
-            radiusMarker = null
         }
         mapGroup.addItem(rallyCircle)
         startPulse()
@@ -77,9 +79,9 @@ class MapGraphicsManager(private val mapView: MapView) {
 
     // ── Drone Marker ─────────────────────────────────────────────────────────
     fun spawnDroneMarker(point: GeoPoint) {
-        droneMarker = Marker(point, "fakeDRON-01").apply {
-            type       = "a-f-A-M-F-Q"
-            title      = "fakeDRON-01"
+        droneMarker = Marker(point, DRONE_CALLSIGN).apply {
+            type       = DRONE_MARKER_TYPE
+            title      = DRONE_CALLSIGN
             setMetaString("how", "m-g")
             updateLabel(0)
         }
@@ -99,7 +101,7 @@ class MapGraphicsManager(private val mapView: MapView) {
     }
 
     private fun Marker.updateLabel(altitude: Int) {
-        setMetaString("callsign", "fakeDRON-01\n${altitude}m")
+        setMetaString("callsign", DRONE_CALLSIGN + System.lineSeparator() + altitude + "m")
     }
 
     fun cleanup() {

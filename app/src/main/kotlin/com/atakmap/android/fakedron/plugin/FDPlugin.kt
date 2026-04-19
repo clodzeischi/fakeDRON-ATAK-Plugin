@@ -22,25 +22,23 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
 class FDPlugin(serviceController: IServiceController) : IPlugin {
-    var serviceController: IServiceController?
     var pluginContext: Context? = null
-    var uiService: IHostUIService?
-    var toolbarItem: ToolbarItem?
+    private val uiService: IHostUIService?
+    private val toolbarItem: ToolbarItem?
     var pluginPane: Pane? = null
-    val mapView = MapView.getMapView()
-    private val graphicsManager by lazy { MapGraphicsManager(mapView) }
-
-    private val broadcaster  = CotBroadcaster(mapView)
-    private val viewModel = DroneViewModel(mapView, graphicsManager, broadcaster)
+    val mapView: MapView = MapView.getMapView()
+        ?: throw IllegalStateException("MapView not available during FDPlugin construction")
+    private val graphicsManager = MapGraphicsManager(mapView)
+    private val broadcaster     = CotBroadcaster(mapView)
+    private val viewModel       = DroneViewModel(mapView, graphicsManager, broadcaster)
 
     private val pluginScope = MainScope()
 
     init {
-        this.serviceController = serviceController
         val ctxProvider = serviceController
             .getService(PluginContextProvider::class.java)
         if (ctxProvider != null) {
-            pluginContext = ctxProvider.getPluginContext()
+            pluginContext = ctxProvider.pluginContext
             pluginContext!!.setTheme(R.style.ATAKPluginTheme)
         }
 
@@ -64,15 +62,15 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
 
     override fun onStart() {
         if (uiService == null) return
-        uiService!!.addToolbarItem(toolbarItem)
+        uiService.addToolbarItem(toolbarItem)
         viewModel.initTargeting(mapView)
     }
 
     override fun onStop() {
         uiService!!.removeToolbarItem(toolbarItem)
+        pluginScope.cancel()
         viewModel.onDestroy()
         graphicsManager.cleanup()
-        pluginScope.cancel()
     }
 
     private fun showPane() {
@@ -100,7 +98,7 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
 
         // if the plugin pane is not visible, show it!
         if (!uiService!!.isPaneVisible(pluginPane)) {
-            uiService!!.showPane(pluginPane, null)
+            uiService.showPane(pluginPane, null)
         }
     }
 }

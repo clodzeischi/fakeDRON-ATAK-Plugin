@@ -25,5 +25,6 @@
     <string name="label_btn_goto_active">TAP THE MAP</string>
     <string name="label_drone_location">DRONE LOCATION</string>
     <string name="label_blank_location">---</string>
+    <string name="toast_no_position">Operator position unavailable</string>
 
 </resources>

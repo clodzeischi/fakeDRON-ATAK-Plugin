@@ -25,12 +25,11 @@ class DroneControlView(
     private val tvTargetAlt = view.findViewById<TextView>(R.id.tv_target_altitude)
     private val tvMgrs = view.findViewById<TextView>(R.id.tv_mgrs)
     private val sbAltitude = view.findViewById<SeekBar>(R.id.sb_target_altitude)
-
     private val btnGoto = view.findViewById<Button>(R.id.btn_goto)
-
 
     // Other vars
     private val altitudes = listOf(100, 200, 300, 400, 500)
+    private var previousStatus: FlightStatus = FlightStatus.IDLE
 
     init {
         bindActions()
@@ -47,7 +46,7 @@ class DroneControlView(
 
         sbAltitude.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                viewModel.onTargetAltitudeChanged(altitudes[progress])
+                if (fromUser) viewModel.onTargetAltitudeChanged(altitudes[progress])
             }
 
             override fun onStartTrackingTouch(sb: SeekBar?) {}
@@ -67,9 +66,13 @@ class DroneControlView(
                 tvMgrs.text = state.location
                     ?: context.getString(R.string.label_blank_location)
 
-                if (state.status != FlightStatus.FLYING && state.isTargeting) {
+                // only exit targeting on the tick that status changes away from FLYING
+                if (previousStatus == FlightStatus.FLYING
+                    && state.status != FlightStatus.FLYING
+                    && state.isTargeting) {
                     viewModel.onFlyToMapPoint()
                 }
+                previousStatus = state.status
             }
         }
 
@@ -126,9 +129,8 @@ class DroneControlView(
         btnRth.isEnabled = rthEnabled
         btnRth.alpha = if (rthEnabled) 1.0f else 0.4f
 
-        // goto — FLYING only, disabled during RTH
-        // user cancels RTH by tapping the map directly
-        val gotoEnabled = status == FlightStatus.FLYING
+        // goto — FLYING and RTH, disabled during RTH only blocks map interaction
+        val gotoEnabled = status == FlightStatus.FLYING || status == FlightStatus.RTH
         btnGoto.isEnabled = gotoEnabled
         btnGoto.alpha = if (gotoEnabled) 1.0f else 0.4f
 

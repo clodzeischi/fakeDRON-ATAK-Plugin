@@ -1,6 +1,8 @@
 package com.atakmap.android.fakedron.plugin.drone
 
+import android.content.Context
 import com.atakmap.android.fakedron.plugin.DroneSimulator
+import com.atakmap.android.fakedron.plugin.R
 import com.atakmap.android.fakedron.plugin.comms.CotBroadcaster
 import com.atakmap.android.fakedron.plugin.mapgraphics.MapGraphicsManager
 import com.atakmap.android.fakedron.plugin.mapgraphics.MapTargetingController
@@ -35,7 +37,7 @@ class DroneViewModel(
             mapView              = mapView,
             graphics             = graphics,
             onRallyPointSet      = { point ->
-                simulator.updateRallyPoint(point)    // ← simulator now knows
+                onRallyPointSet(point)    // ← route through VM method, not simulator directly
             },
             onTargetingModeChanged = { isTargeting ->
                 _state.value = _state.value.copy(isTargeting = isTargeting)
@@ -73,7 +75,7 @@ class DroneViewModel(
             FlightStatus.IDLE -> {
                 val self = ATAKUtilities.findSelf(mapView)
                 if (self == null || !self.point.isValid) {
-                    _toastMessage.value = "Operator position unknown"
+                    _toastMessage.value = mapView.context.getString(R.string.toast_no_position)
                     return
                 }
                 val spawnPoint = simulator.spawnOffset(self.point)
@@ -99,7 +101,7 @@ class DroneViewModel(
     fun onRth() {
         val self = ATAKUtilities.findSelf(mapView)
         if (self == null || !self.point.isValid) {
-            _toastMessage.value = "Operator position unknown"
+            _toastMessage.value = mapView.context.getString(R.string.toast_no_position)
             return
         }
         simulator.startRTH(self.point)
@@ -107,6 +109,9 @@ class DroneViewModel(
     }
 
     fun onFlyToMapPoint() {
+        if (_state.value.status == FlightStatus.RTH) {
+            simulator.cancelRTH()
+        }
         targetingController.toggle()
     }
 
