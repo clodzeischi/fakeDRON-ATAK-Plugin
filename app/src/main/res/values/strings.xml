@@ -22,6 +22,7 @@
     <string name="label_blank_alt">---m</string>
     <string name="label_default_alt">120m</string>
     <string name="label_btn_goto">FLY TO MAP POINT</string>
+    <string name="label_btn_goto_active">TAP THE MAP</string>
     <string name="label_drone_location">DRONE LOCATION</string>
     <string name="label_blank_location">---</string>
 

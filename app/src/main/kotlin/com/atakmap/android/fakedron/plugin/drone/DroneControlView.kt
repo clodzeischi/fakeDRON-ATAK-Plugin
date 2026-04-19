@@ -26,6 +26,9 @@ class DroneControlView(
     private val tvMgrs = view.findViewById<TextView>(R.id.tv_mgrs)
     private val sbAltitude = view.findViewById<SeekBar>(R.id.sb_target_altitude)
 
+    private val btnGoto = view.findViewById<Button>(R.id.btn_goto)
+
+
     // Other vars
     private val altitudes = listOf(100, 200, 300, 400, 500)
 
@@ -37,6 +40,7 @@ class DroneControlView(
     private fun bindActions() {
         btnLaunchLand.setOnClickListener { viewModel.onLaunchLand() }
         btnRth.setOnClickListener { viewModel.onRth() }
+        btnGoto.setOnClickListener { viewModel.onFlyToMapPoint() }
 
         sbAltitude.max = altitudes.size - 1  // max = 4, giving us 5 steps (0..4)
         sbAltitude.progress = 0              // default to 100m
@@ -56,6 +60,7 @@ class DroneControlView(
             viewModel.state.collect { state ->
                 updateStatusChip(state.status)
                 updateFlightControls(state.status)
+                updateGotoButton(state.isTargeting)
                 tvTargetAlt.text = "${state.targetAltitude}m"
                 tvActualAlt.text = state.actualAltitude?.let { "${it}m" }
                     ?: context.getString(R.string.label_blank_alt)
@@ -109,5 +114,18 @@ class DroneControlView(
         // disable slider when landing so user knows control is locked
         sbAltitude.isEnabled = status != FlightStatus.LANDING
         sbAltitude.alpha = if (status == FlightStatus.LANDING) 0.4f else 1.0f
+    }
+
+    private fun updateGotoButton(isTargeting: Boolean) {
+        val (label, color) = if (isTargeting) {
+            context.getString(R.string.label_btn_goto_active) to context.getColor(
+                R.color.background_btn_active
+            )
+        } else {
+            context.getString(R.string.label_btn_goto) to context.getColor(
+                R.color.background_btn)
+        }
+        btnGoto.text = label
+        btnGoto.backgroundTintList = ColorStateList.valueOf(color)
     }
 }

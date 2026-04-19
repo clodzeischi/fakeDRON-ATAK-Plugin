@@ -1,6 +1,8 @@
 package com.atakmap.android.fakedron.plugin.drone
 
 import com.atakmap.android.fakedron.plugin.DroneSimulator
+import com.atakmap.android.fakedron.plugin.mapgraphics.MapGraphicsManager
+import com.atakmap.android.fakedron.plugin.mapgraphics.MapTargetingController
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.util.ATAKUtilities
 import kotlinx.coroutines.MainScope
@@ -19,6 +21,14 @@ class DroneViewModel(
 
     private val _toastMessage = MutableStateFlow<String?>(null)
     val toastMessage: StateFlow<String?> = _toastMessage.asStateFlow()
+
+    private lateinit var targetingController: MapTargetingController
+
+    fun initTargeting(mapView: MapView, graphics: MapGraphicsManager) {
+        targetingController = MapTargetingController(mapView, graphics) { isTargeting ->
+            _state.value = _state.value.copy(isTargeting = isTargeting)
+        }
+    }
 
     private val simulator = DroneSimulator(
         scope = viewModelScope,
@@ -45,6 +55,10 @@ class DroneViewModel(
         }
     }
 
+    fun onFlyToMapPoint() {
+        targetingController.toggle()
+    }
+
     fun onRth() {
         _state.value = _state.value.copy(status = FlightStatus.RTH)
     }
@@ -62,6 +76,7 @@ class DroneViewModel(
     }
 
     fun onDestroy() {
+        targetingController.cleanup()
         simulator.stop()
         viewModelScope.cancel()
     }

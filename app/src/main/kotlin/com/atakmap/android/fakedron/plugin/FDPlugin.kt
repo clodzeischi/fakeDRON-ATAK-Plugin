@@ -6,6 +6,7 @@ import com.atak.plugins.impl.PluginContextProvider
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.fakedron.plugin.drone.DroneControlView
 import com.atakmap.android.fakedron.plugin.drone.DroneViewModel
+import com.atakmap.android.fakedron.plugin.mapgraphics.MapGraphicsManager
 import com.atakmap.android.maps.MapView
 import gov.tak.api.commons.graphics.Bitmap
 import gov.tak.api.plugin.IPlugin
@@ -26,9 +27,10 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
     var toolbarItem: ToolbarItem?
     var pluginPane: Pane? = null
     val mapView = MapView.getMapView()
-    private val viewModel by lazy {
-        DroneViewModel(mapView)
-    }
+    private val viewModel = DroneViewModel(mapView)
+
+    private val graphicsManager by lazy { MapGraphicsManager(mapView) }
+
     private val pluginScope = MainScope()
 
     init {
@@ -60,13 +62,14 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
 
     override fun onStart() {
         if (uiService == null) return
-
         uiService!!.addToolbarItem(toolbarItem)
+        viewModel.initTargeting(mapView, graphicsManager)
     }
 
     override fun onStop() {
         uiService!!.removeToolbarItem(toolbarItem)
         viewModel.onDestroy()
+        graphicsManager.cleanup()
         pluginScope.cancel()
     }
 
@@ -89,7 +92,7 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
                 context = pluginContext!!,
                 view = view,
                 viewModel = viewModel,
-                lifecycleScope = MainScope()
+                lifecycleScope = pluginScope
             )
         }
 
