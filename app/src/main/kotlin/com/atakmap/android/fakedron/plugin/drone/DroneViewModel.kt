@@ -1,6 +1,7 @@
 package com.atakmap.android.fakedron.plugin.drone
 
 import com.atakmap.android.fakedron.plugin.DroneSimulator
+import com.atakmap.android.fakedron.plugin.comms.CotBroadcaster
 import com.atakmap.android.fakedron.plugin.mapgraphics.MapGraphicsManager
 import com.atakmap.android.fakedron.plugin.mapgraphics.MapTargetingController
 import com.atakmap.android.maps.MapView
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class DroneViewModel(
     private val mapView: MapView,
-    private val graphics: MapGraphicsManager
+    private val graphics: MapGraphicsManager,
+    broadcaster: CotBroadcaster
 ) {
     private val viewModelScope = MainScope()
 
@@ -42,12 +44,12 @@ class DroneViewModel(
     }
 
     private val simulator = DroneSimulator(
-        scope         = viewModelScope,
+        scope = viewModelScope,
         onStateUpdate = { status, altitude, position, rallyCleared ->
             _state.value = _state.value.copy(
-                status         = status,
+                status = status,
                 actualAltitude = altitude,
-                location       = position?.let { toMGRS(it) }
+                location = position?.let { toMGRS(it) }
             )
 
             position?.let {
@@ -62,7 +64,8 @@ class DroneViewModel(
             if (rallyCleared) {
                 graphics.clearRallyPoint()
             }
-        }
+        },
+        broadcaster = broadcaster
     )
 
     fun onLaunchLand() {

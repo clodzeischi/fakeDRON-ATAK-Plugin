@@ -1,7 +1,7 @@
 package com.atakmap.android.fakedron.plugin
 
+import com.atakmap.android.fakedron.plugin.comms.CotBroadcaster
 import com.atakmap.android.fakedron.plugin.drone.FlightStatus
-import com.atakmap.android.maps.MapView
 import com.atakmap.coremap.maps.coords.GeoCalculations
 import com.atakmap.coremap.maps.coords.GeoPoint
 import kotlinx.coroutines.CoroutineScope
@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 class DroneSimulator(
     private val scope: CoroutineScope,
+    private val broadcaster: CotBroadcaster,
     private val onStateUpdate: (FlightStatus, Int, GeoPoint?, Boolean) -> Unit
 ) {
     companion object {
@@ -27,6 +28,7 @@ class DroneSimulator(
     private var actualAltitude      = 0
     private var targetAltitude      = 0
     private var currentPosition: GeoPoint? = null
+    private var lastPosition: GeoPoint? = null
     private var rallyPoint: GeoPoint?      = null
 
     private var isRTH = false
@@ -127,12 +129,33 @@ class DroneSimulator(
             }
         }
 
-        // ── Stop loop on landing ──────────────────────────────────────────────
-        if (newStatus == FlightStatus.IDLE) {
-            simulationJob?.cancel()
-        }
+        broadcastTick(newStatus, currentPosition, actualAltitude)
 
         onStateUpdate(newStatus, actualAltitude, currentPosition, rallyCleared)
+
+        // ── Stop loop on landing ──────────────────────────────────────────────
+        if (newStatus == FlightStatus.IDLE) {
+            broadcaster.onLanded()
+            simulationJob?.cancel()
+        }
+    }
+
+    private fun broadcastTick(status: FlightStatus, position: GeoPoint?, altitude: Int) {
+        if (position == null) return
+        if (status == FlightStatus.IDLE || status == FlightStatus.LANDING) return
+
+        val last   = lastPosition
+        val course = if (last != null)
+            GeoCalculations.bearingTo(last, position)
+        else 0.0
+
+        // speed = distance moved this tick / tick duration in seconds
+        val speed = if (last != null)
+            GeoCalculations.distanceTo(last, position) / (TICK_MS / 1000.0)
+        else 0.0
+
+        broadcaster.onTick(position, altitude, speed, course)
+        lastPosition = position
     }
 
     // 50m north of operator using ATAK native bearing/distance

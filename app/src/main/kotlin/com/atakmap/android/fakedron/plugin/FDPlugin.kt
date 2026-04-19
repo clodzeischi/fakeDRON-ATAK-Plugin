@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.atak.plugins.impl.PluginContextProvider
 import com.atak.plugins.impl.PluginLayoutInflater
+import com.atakmap.android.fakedron.plugin.comms.CotBroadcaster
 import com.atakmap.android.fakedron.plugin.drone.DroneControlView
 import com.atakmap.android.fakedron.plugin.drone.DroneViewModel
 import com.atakmap.android.fakedron.plugin.mapgraphics.MapGraphicsManager
@@ -28,7 +29,9 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
     var pluginPane: Pane? = null
     val mapView = MapView.getMapView()
     private val graphicsManager by lazy { MapGraphicsManager(mapView) }
-    private val viewModel = DroneViewModel(mapView, graphicsManager)
+
+    private val broadcaster  = CotBroadcaster(mapView)
+    private val viewModel = DroneViewModel(mapView, graphicsManager, broadcaster)
 
     private val pluginScope = MainScope()
 
