@@ -55,7 +55,7 @@ class DroneControlView(
         lifecycleScope.launch {
             viewModel.state.collect { state ->
                 updateStatusChip(state.status)
-                updateLaunchButton(state.status)
+                updateFlightControls(state.status)
                 tvTargetAlt.text = "${state.targetAltitude}m"
                 tvActualAlt.text = state.actualAltitude?.let { "${it}m" }
                     ?: context.getString(R.string.label_blank_alt)
@@ -95,16 +95,19 @@ class DroneControlView(
         tvDroneState.setTextColor(color)
     }
 
-    private fun updateLaunchButton(status: FlightStatus) {
+    private fun updateFlightControls(status: FlightStatus) {
         val (label, color) = when (status) {
             FlightStatus.IDLE,
             FlightStatus.LANDING -> context.getString(R.string.label_btn_launch) to context.getColor(
                 R.color.launching
             )
-
             else -> context.getString(R.string.label_btn_land) to context.getColor(R.color.landing)
         }
         btnLaunchLand.text = label
         btnLaunchLand.backgroundTintList = ColorStateList.valueOf(color)
+
+        // disable slider when landing so user knows control is locked
+        sbAltitude.isEnabled = status != FlightStatus.LANDING
+        sbAltitude.alpha = if (status == FlightStatus.LANDING) 0.4f else 1.0f
     }
 }

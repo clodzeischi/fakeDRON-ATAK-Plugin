@@ -40,14 +40,8 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
             pluginContext!!.setTheme(R.style.ATAKPluginTheme)
         }
 
-        // obtain the UI service
         uiService = serviceController.getService(IHostUIService::class.java)
 
-        // initialize the toolbar button for the plugin
-
-        // create the button and set the identifier to be well known
-        // if you fail to do this, the toolbar configuration will never
-        // be able to find it again after the user moves the icon.
         toolbarItem = ToolbarItem.Builder(
             pluginContext!!.getString(R.string.app_name),
             MarshalManager.marshal(
@@ -65,26 +59,19 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
     }
 
     override fun onStart() {
-        // the plugin is starting, add the button to the toolbar
         if (uiService == null) return
 
         uiService!!.addToolbarItem(toolbarItem)
     }
 
     override fun onStop() {
-        // the plugin is stopping, remove the button from the toolbar
-        if (uiService == null) return
-
         uiService!!.removeToolbarItem(toolbarItem)
+        viewModel.onDestroy()
         pluginScope.cancel()
     }
 
     private fun showPane() {
-        // instantiate the plugin view if necessary
         if (pluginPane == null) {
-            // Remember to use the PluginLayoutInflator if you are actually inflating a custom view
-            // In this case, using it is not necessary - but I am putting it here to remind
-            // developers to look at this Inflator
 
             val view = PluginLayoutInflater.inflate(
                 pluginContext,
