@@ -1,21 +1,24 @@
 package com.atakmap.android.fakedron.plugin.mapgraphics
 
-import android.util.Log
 import com.atakmap.android.maps.MapEvent
 import com.atakmap.android.maps.MapEventDispatcher
 import com.atakmap.android.maps.MapView
+import com.atakmap.coremap.maps.coords.GeoPoint
+import com.atakmap.map.AtakMapView
 
 class MapTargetingController(
     private val mapView: MapView,
     private val graphics: MapGraphicsManager,
+    private val onRallyPointSet: (GeoPoint) -> Unit,
     private val onTargetingModeChanged: (Boolean) -> Unit
 ) {
     private var isTargeting = false
 
-    private val mapClickListener = object : MapEventDispatcher.MapEventDispatchListener {
-        override fun onMapEvent(event: MapEvent) {
-            val geoPoint = mapView.inverse(event.pointF)
-            geoPoint?.let { graphics.spawnPing(it) }
+    private val mapClickListener = MapEventDispatcher.MapEventDispatchListener { event ->
+        val geoPoint = mapView.inverse(event.pointF)
+        geoPoint?.let {
+            graphics.setRallyPoint(it)
+            onRallyPointSet(it.get())
         }
     }
 

@@ -1,5 +1,7 @@
 package com.atakmap.android.fakedron.plugin.drone
 
+import com.atakmap.coremap.maps.coords.GeoPoint
+
 enum class FlightStatus { IDLE, LAUNCHING, FLYING, LANDING, RTH }
 
 data class DroneState(
@@ -7,5 +9,6 @@ data class DroneState(
     val targetAltitude: Int = 100,
     val actualAltitude: Int? = null,
     val location: String? = null,
-    val isTargeting: Boolean = false
+    val isTargeting: Boolean = false,
+    val rallyPoint: GeoPoint? = null
 )

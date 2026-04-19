@@ -27,9 +27,8 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
     var toolbarItem: ToolbarItem?
     var pluginPane: Pane? = null
     val mapView = MapView.getMapView()
-    private val viewModel = DroneViewModel(mapView)
-
     private val graphicsManager by lazy { MapGraphicsManager(mapView) }
+    private val viewModel = DroneViewModel(mapView, graphicsManager)
 
     private val pluginScope = MainScope()
 
@@ -63,7 +62,7 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
     override fun onStart() {
         if (uiService == null) return
         uiService!!.addToolbarItem(toolbarItem)
-        viewModel.initTargeting(mapView, graphicsManager)
+        viewModel.initTargeting(mapView)
     }
 
     override fun onStop() {

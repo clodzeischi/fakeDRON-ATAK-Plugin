@@ -5,6 +5,9 @@ import com.atakmap.android.fakedron.plugin.mapgraphics.MapGraphicsManager
 import com.atakmap.android.fakedron.plugin.mapgraphics.MapTargetingController
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.util.ATAKUtilities
+import com.atakmap.coremap.conversions.CoordinateFormat
+import com.atakmap.coremap.conversions.CoordinateFormatUtilities
+import com.atakmap.coremap.maps.coords.GeoPoint
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class DroneViewModel(
-    private val mapView: MapView
+    private val mapView: MapView,
+    private val graphics: MapGraphicsManager
 ) {
     private val viewModelScope = MainScope()
 
@@ -24,19 +28,40 @@ class DroneViewModel(
 
     private lateinit var targetingController: MapTargetingController
 
-    fun initTargeting(mapView: MapView, graphics: MapGraphicsManager) {
-        targetingController = MapTargetingController(mapView, graphics) { isTargeting ->
-            _state.value = _state.value.copy(isTargeting = isTargeting)
-        }
+    fun initTargeting(mapView: MapView) {
+        targetingController = MapTargetingController(
+            mapView              = mapView,
+            graphics             = graphics,
+            onRallyPointSet      = { point ->
+                simulator.updateRallyPoint(point)    // ← simulator now knows
+            },
+            onTargetingModeChanged = { isTargeting ->
+                _state.value = _state.value.copy(isTargeting = isTargeting)
+            }
+        )
     }
 
     private val simulator = DroneSimulator(
-        scope = viewModelScope,
-        onStateUpdate = { status, altitude ->
+        scope         = viewModelScope,
+        onStateUpdate = { status, altitude, position, rallyCleared ->
             _state.value = _state.value.copy(
-                status = status,
-                actualAltitude = altitude
+                status         = status,
+                actualAltitude = altitude,
+                location       = position?.let { toMGRS(it) }
             )
+
+            position?.let {
+                if (status == FlightStatus.IDLE) {
+                    graphics.removeDroneMarker()
+                    graphics.clearRallyPoint()
+                } else {
+                    graphics.updateDroneMarker(it, altitude)
+                }
+            }
+
+            if (rallyCleared) {
+                graphics.clearRallyPoint()
+            }
         }
     )
 
@@ -48,11 +73,26 @@ class DroneViewModel(
         }
 
         when (_state.value.status) {
-            FlightStatus.IDLE    -> simulator.launch(_state.value.targetAltitude)
+            FlightStatus.IDLE -> {
+                val spawnPoint = simulator.spawnOffset(self.point)
+                graphics.spawnDroneMarker(spawnPoint)
+                simulator.launch(_state.value.targetAltitude, spawnPoint)
+            }
             FlightStatus.FLYING,
             FlightStatus.LAUNCHING -> simulator.land()
-            else                 -> Unit  // ignore taps during LANDING
+            else -> Unit  // ignore taps during LANDING
         }
+    }
+
+    fun onRallyPointSet(point: GeoPoint) {
+        simulator.updateRallyPoint(point)
+    }
+
+    private fun checkRallyArrival(position: GeoPoint?) {
+        val rally = _state.value.rallyPoint ?: return
+        val pos   = position ?: return
+        // arrival check is handled inside simulator,
+        // graphics clears rally at 20m — already wired in simulator
     }
 
     fun onFlyToMapPoint() {
@@ -60,7 +100,7 @@ class DroneViewModel(
     }
 
     fun onRth() {
-        _state.value = _state.value.copy(status = FlightStatus.RTH)
+
     }
 
     fun onTargetAltitudeChanged(altitude: Int) {
@@ -73,6 +113,15 @@ class DroneViewModel(
 
     fun clearToast() {
         _toastMessage.value = null
+    }
+
+    private fun toMGRS(point: GeoPoint): String {
+        return try {
+            val mgrs = CoordinateFormatUtilities.formatToString(point, CoordinateFormat.MGRS)
+            mgrs.toString()
+        } catch (e: Exception) {
+            "---"
+        }
     }
 
     fun onDestroy() {
