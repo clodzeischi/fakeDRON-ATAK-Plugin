@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1a1a1a">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,30 +13,17 @@
         android:padding="12dp">
 
         <!-- ── HEADER ── -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:drawableStart="@drawable/icon_drone"
+            android:drawablePadding="8dp"
+            android:text="@string/app_name"
+            android:textColor="@color/header"
+            android:textSize="20sp"
+            android:textStyle="bold"
             android:gravity="center_vertical"
-            android:paddingBottom="12dp">
-
-            <ImageView
-                android:id="@+id/iv_logo"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:src="@drawable/icon_drone"
-                android:contentDescription="fakeDRON logo" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="fakeDRON"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
+            android:paddingBottom="12dp" />
 
         <!-- ── STATUS CHIP ── -->
         <TextView
@@ -46,13 +33,14 @@
             android:layout_marginBottom="16dp"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
-            android:text="● IDLE"
-            android:textColor="#FFFFFF"
+            android:text="@string/label_status_idle"
+            android:textColor="@color/text_primary"
             android:textSize="13sp"
             android:textStyle="bold" />
 
         <!-- ── PRIMARY ACTIONS ── -->
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -60,22 +48,24 @@
 
             <Button
                 android:id="@+id/btn_launch_land"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="52dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="LAUNCH"
-                android:textColor="#FFFFFF"
+                android:text="@string/label_btn_launch"
+                android:textColor="@color/text_primary"
                 android:backgroundTint="#2E7D32"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btn_rth"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="52dp"
                 android:layout_weight="1"
-                android:text="RTH"
-                android:textColor="#FFFFFF"
+                android:text="@string/label_btn_rth"
+                android:textColor="@color/text_primary"
                 android:backgroundTint="#B71C1C"
                 android:textStyle="bold" />
 
@@ -85,8 +75,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ALTITUDE"
-            android:textColor="#9E9E9E"
+            android:text="@string/label_altitude"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
@@ -103,8 +93,8 @@
             <TextView
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
-                android:text="Target"
-                android:textColor="#B0B0B0"
+                android:text="@string/label_target"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
             <SeekBar
@@ -112,16 +102,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:max="400"
-                android:progress="120" />
+                android:layout_marginHorizontal="8dp" />
 
             <TextView
                 android:id="@+id/tv_target_altitude"
                 android:layout_width="44dp"
                 android:layout_height="wrap_content"
-                android:text="120m"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textSize="13sp"
                 android:gravity="end" />
 
@@ -138,8 +125,8 @@
             <TextView
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
-                android:text="Actual"
-                android:textColor="#B0B0B0"
+                android:text="@string/label_actual"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
             <View
@@ -153,8 +140,8 @@
                 android:id="@+id/tv_actual_altitude"
                 android:layout_width="44dp"
                 android:layout_height="wrap_content"
-                android:text="---m"
-                android:textColor="#78C1F3"
+                android:text="@string/label_blank_alt"
+                android:textColor="@color/text_tertiary"
                 android:textSize="13sp"
                 android:gravity="end" />
 
@@ -166,17 +153,17 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginBottom="20dp"
-            android:text="FLY TO MAP POINT"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#1565C0"
+            android:text="@string/label_btn_goto"
+            android:textColor="@color/text_primary"
+            android:backgroundTint="@color/background_btn"
             android:textStyle="bold" />
 
         <!-- ── LOCATION ── -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="DRONE LOCATION"
-            android:textColor="#9E9E9E"
+            android:text="@string/label_drone_location"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
@@ -186,8 +173,8 @@
             android:id="@+id/tv_mgrs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="---"
-            android:textColor="#78C1F3"
+            android:text="@string/label_blank_location"
+            android:textColor="@color/text_tertiary"
             android:textSize="16sp"
             android:fontFamily="monospace"
             android:paddingVertical="8dp" />

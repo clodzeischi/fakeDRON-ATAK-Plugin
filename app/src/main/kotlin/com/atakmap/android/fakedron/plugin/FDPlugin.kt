@@ -6,6 +6,7 @@ import com.atak.plugins.impl.PluginContextProvider
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.fakedron.plugin.drone.DroneControlView
 import com.atakmap.android.fakedron.plugin.drone.DroneViewModel
+import com.atakmap.android.maps.MapView
 import gov.tak.api.commons.graphics.Bitmap
 import gov.tak.api.plugin.IPlugin
 import gov.tak.api.plugin.IServiceController
@@ -24,7 +25,10 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
     var uiService: IHostUIService?
     var toolbarItem: ToolbarItem?
     var pluginPane: Pane? = null
-    private val viewModel = DroneViewModel()
+    val mapView = MapView.getMapView()
+    private val viewModel by lazy {
+        DroneViewModel(mapView)
+    }
     private val pluginScope = MainScope()
 
     init {
