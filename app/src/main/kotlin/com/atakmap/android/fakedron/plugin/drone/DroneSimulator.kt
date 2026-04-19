@@ -13,7 +13,17 @@ import kotlinx.coroutines.launch
 class DroneSimulator(
     private val scope: CoroutineScope,
     private val broadcaster: CotBroadcaster,
-    private val onStateUpdate: (FlightStatus, Int, GeoPoint?, Boolean) -> Unit
+    private val onStateUpdate: (FlightStatus, Int, GeoPoint?, Boolean) -> Unit,
+    // We have to inject these lambda wrappers here, otherwise we cannot test
+    private val geoDistanceTo: (GeoPoint, GeoPoint) -> Double = { a, b ->
+        GeoCalculations.distanceTo(a, b)
+    },
+    private val geoBearingTo: (GeoPoint, GeoPoint) -> Double = { a, b ->
+        GeoCalculations.bearingTo(a, b)
+    },
+    private val geoPointAtDistance: (GeoPoint, Double, Double) -> GeoPoint = { point, bearing, distance ->
+        GeoCalculations.pointAtDistance(point, bearing, distance)
+    }
 ) {
     companion object {
         const val ALTITUDE_STEP_M  = 3
@@ -25,7 +35,7 @@ class DroneSimulator(
     }
 
     private var simulationJob: Job? = null
-    private var actualAltitude      = 0
+    internal var actualAltitude      = 0
     private var targetAltitude      = 0
     private var currentPosition: GeoPoint? = null
     private var lastPosition: GeoPoint? = null
@@ -87,7 +97,7 @@ class DroneSimulator(
         }
     }
 
-    private fun tick() {
+    internal fun tick() {
         // ── Altitude ─────────────────────────────────────────────────────────
         actualAltitude = when {
             actualAltitude < targetAltitude ->
@@ -112,7 +122,7 @@ class DroneSimulator(
             val rally = rallyPoint
             val pos   = currentPosition
             if (rally != null && pos != null) {
-                val dist = GeoCalculations.distanceTo(pos, rally)
+                val dist = geoDistanceTo(pos, rally)
                 if (dist <= ARRIVAL_RADIUS_M) {
                     rallyPoint   = null
                     rallyCleared = true
@@ -122,8 +132,8 @@ class DroneSimulator(
                         targetAltitude = 0
                     }
                 } else {
-                    val bearing     = GeoCalculations.bearingTo(pos, rally)
-                    currentPosition = GeoCalculations.pointAtDistance(
+                    val bearing     = geoBearingTo(pos, rally)
+                    currentPosition = geoPointAtDistance(
                         pos, bearing, MOVEMENT_STEP_M
                     )
                 }
@@ -146,9 +156,9 @@ class DroneSimulator(
         if (status == FlightStatus.IDLE || status == FlightStatus.LANDING) return
 
         val last   = lastPosition
-        val dist   = if (last != null) GeoCalculations.distanceTo(last, position) else 0.0
+        val dist   = if (last != null) geoDistanceTo(last, position) else 0.0
         val course = if (last != null && dist > 0.01)
-            GeoCalculations.bearingTo(last, position)
+            geoBearingTo(last, position)
         else 0.0
         val speed  = if (last != null && dist > 0.01)
             dist / (TICK_MS / 1000.0)
@@ -160,6 +170,6 @@ class DroneSimulator(
 
     // 50m north of operator using ATAK native bearing/distance
     fun spawnOffset(origin: GeoPoint): GeoPoint {
-        return GeoCalculations.pointAtDistance(origin, 0.0, SPAWN_OFFSET_M)
+        return geoPointAtDistance(origin, 0.0, SPAWN_OFFSET_M)
     }
 }

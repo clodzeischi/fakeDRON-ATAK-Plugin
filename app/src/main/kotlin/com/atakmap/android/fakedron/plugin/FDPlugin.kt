@@ -29,7 +29,7 @@ class FDPlugin(serviceController: IServiceController) : IPlugin {
     val mapView: MapView = MapView.getMapView()
         ?: throw IllegalStateException("MapView not available during FDPlugin construction")
     private val graphicsManager = MapGraphicsManager(mapView)
-    private val broadcaster     = CotBroadcaster(mapView)
+    private val broadcaster     = CotBroadcaster(mapView.selfMarker.uid)
     private val viewModel       = DroneViewModel(mapView, graphicsManager, broadcaster)
 
     private val pluginScope = MainScope()

@@ -107,7 +107,6 @@ class DroneControlView(
         tvDroneState.setTextColor(color)
     }
 
-
     private fun updateFlightControls(status: FlightStatus) {
         // launch/land label and color
         val (label, color) = when (status) {
@@ -139,6 +138,8 @@ class DroneControlView(
         sbAltitude.isEnabled = sliderEnabled
         sbAltitude.alpha = if (sliderEnabled) 1.0f else 0.4f
     }
+
+
 
     private fun updateGotoButton(isTargeting: Boolean) {
         val (label, color) = if (isTargeting) {

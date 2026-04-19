@@ -1,6 +1,5 @@
 package com.atakmap.android.fakedron.plugin.comms
 
-import android.util.Log
 import com.atakmap.android.cot.CotMapComponent
 import com.atakmap.android.maps.MapView
 import com.atakmap.coremap.cot.event.CotDetail
@@ -9,7 +8,11 @@ import com.atakmap.coremap.cot.event.CotPoint
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.coremap.maps.time.CoordinatedTime
 
-class CotBroadcaster(private val mapView: MapView) {
+class CotBroadcaster(deviceUid: String) {
+
+    private val uid = "fakeDRON-$deviceUid"
+
+    // rest unchanged
 
     companion object {
         const val BROADCAST_INTERVAL_MS  = 60_000L   // 60s max time gate
@@ -19,9 +22,6 @@ class CotBroadcaster(private val mapView: MapView) {
         const val COT_HOW                = "m-g"
         const val DELETE_TYPE            = "t-x-d-d"
     }
-
-    // uid is derived once from device UID — stable for lifetime of plugin
-    private val uid = "fakeDRON-${mapView.selfMarker.uid}"
 
     private var lastBroadcastTime     = 0L
     private var lastBroadcastPosition: GeoPoint? = null
@@ -90,26 +90,24 @@ class CotBroadcaster(private val mapView: MapView) {
     }
 
     private fun sendDeleteEvent() {
+        val dispatcher = CotMapComponent.getExternalDispatcher() ?: return
         val now = CoordinatedTime()
+        val dronerUid = uid  // capture outer uid before apply block
 
         val event = CotEvent().apply {
-            this.uid   = this@CotBroadcaster.uid
+            setUID(dronerUid)      // ← explicit outer uid
             type       = DELETE_TYPE
             how        = COT_HOW
             time       = now
             start      = now
-            stale      = now   // immediately stale
+            stale      = now
             setPoint(CotPoint(
-                CotPoint.UNKNOWN,
-                CotPoint.UNKNOWN,
-                CotPoint.UNKNOWN,
-                CotPoint.UNKNOWN,
-                CotPoint.UNKNOWN
+                CotPoint.UNKNOWN, CotPoint.UNKNOWN, CotPoint.UNKNOWN,
+                CotPoint.UNKNOWN, CotPoint.UNKNOWN
             ))
             detail = CotDetail()
         }
-
-        CotMapComponent.getExternalDispatcher().dispatch(event)
+        dispatcher.dispatch(event)
     }
 
     private fun buildDetail(speed: Double, course: Double): CotDetail {
