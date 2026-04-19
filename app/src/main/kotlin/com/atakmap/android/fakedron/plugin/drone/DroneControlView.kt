@@ -66,6 +66,10 @@ class DroneControlView(
                     ?: context.getString(R.string.label_blank_alt)
                 tvMgrs.text = state.location
                     ?: context.getString(R.string.label_blank_location)
+
+                if (state.status != FlightStatus.FLYING && state.isTargeting) {
+                    viewModel.onFlyToMapPoint()
+                }
             }
         }
 
@@ -100,20 +104,38 @@ class DroneControlView(
         tvDroneState.setTextColor(color)
     }
 
+
     private fun updateFlightControls(status: FlightStatus) {
+        // launch/land label and color
         val (label, color) = when (status) {
             FlightStatus.IDLE,
             FlightStatus.LANDING -> context.getString(R.string.label_btn_launch) to context.getColor(
                 R.color.launching
             )
+
             else -> context.getString(R.string.label_btn_land) to context.getColor(R.color.landing)
         }
         btnLaunchLand.text = label
         btnLaunchLand.backgroundTintList = ColorStateList.valueOf(color)
 
-        // disable slider when landing so user knows control is locked
-        sbAltitude.isEnabled = status != FlightStatus.LANDING
-        sbAltitude.alpha = if (status == FlightStatus.LANDING) 0.4f else 1.0f
+        // launch/land enabled in all non-LANDING states
+        btnLaunchLand.isEnabled = status != FlightStatus.LANDING
+
+        // RTH active when FLYING or already in RTH
+        val rthEnabled = status == FlightStatus.FLYING || status == FlightStatus.RTH
+        btnRth.isEnabled = rthEnabled
+        btnRth.alpha = if (rthEnabled) 1.0f else 0.4f
+
+        // goto — FLYING only, disabled during RTH
+        // user cancels RTH by tapping the map directly
+        val gotoEnabled = status == FlightStatus.FLYING
+        btnGoto.isEnabled = gotoEnabled
+        btnGoto.alpha = if (gotoEnabled) 1.0f else 0.4f
+
+        // slider — disabled during LANDING and RTH
+        val sliderEnabled = status != FlightStatus.LANDING && status != FlightStatus.RTH
+        sbAltitude.isEnabled = sliderEnabled
+        sbAltitude.alpha = if (sliderEnabled) 1.0f else 0.4f
     }
 
     private fun updateGotoButton(isTargeting: Boolean) {
@@ -123,7 +145,8 @@ class DroneControlView(
             )
         } else {
             context.getString(R.string.label_btn_goto) to context.getColor(
-                R.color.background_btn)
+                R.color.background_btn
+            )
         }
         btnGoto.text = label
         btnGoto.backgroundTintList = ColorStateList.valueOf(color)

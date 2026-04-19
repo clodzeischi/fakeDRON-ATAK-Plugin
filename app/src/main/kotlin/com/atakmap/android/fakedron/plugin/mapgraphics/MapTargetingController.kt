@@ -4,7 +4,6 @@ import com.atakmap.android.maps.MapEvent
 import com.atakmap.android.maps.MapEventDispatcher
 import com.atakmap.android.maps.MapView
 import com.atakmap.coremap.maps.coords.GeoPoint
-import com.atakmap.map.AtakMapView
 
 class MapTargetingController(
     private val mapView: MapView,
@@ -17,7 +16,7 @@ class MapTargetingController(
     private val mapClickListener = MapEventDispatcher.MapEventDispatchListener { event ->
         val geoPoint = mapView.inverse(event.pointF)
         geoPoint?.let {
-            graphics.setRallyPoint(it)
+            graphics.setRallyPoint(it.get())
             onRallyPointSet(it.get())
         }
     }

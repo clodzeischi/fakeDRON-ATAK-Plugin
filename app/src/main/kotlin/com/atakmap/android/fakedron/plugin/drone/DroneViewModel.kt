@@ -66,41 +66,54 @@ class DroneViewModel(
     )
 
     fun onLaunchLand() {
+        when (_state.value.status) {
+            FlightStatus.IDLE -> {
+                val self = ATAKUtilities.findSelf(mapView)
+                if (self == null || !self.point.isValid) {
+                    _toastMessage.value = "Operator position unknown"
+                    return
+                }
+                val spawnPoint = simulator.spawnOffset(self.point)
+                graphics.spawnDroneMarker(spawnPoint)
+                simulator.launch(_state.value.targetAltitude, spawnPoint)
+            }
+
+            FlightStatus.FLYING,
+            FlightStatus.LAUNCHING,
+            FlightStatus.RTH -> {      // ← RTH also responds to LAND
+                simulator.land()
+                simulator.clearRallyPoint()
+                graphics.clearRallyPoint()
+                if (_state.value.isTargeting) {
+                    targetingController.toggle()
+                }
+            }
+
+            else -> Unit
+        }
+    }
+
+    fun onRth() {
         val self = ATAKUtilities.findSelf(mapView)
         if (self == null || !self.point.isValid) {
             _toastMessage.value = "Operator position unknown"
             return
         }
-
-        when (_state.value.status) {
-            FlightStatus.IDLE -> {
-                val spawnPoint = simulator.spawnOffset(self.point)
-                graphics.spawnDroneMarker(spawnPoint)
-                simulator.launch(_state.value.targetAltitude, spawnPoint)
-            }
-            FlightStatus.FLYING,
-            FlightStatus.LAUNCHING -> simulator.land()
-            else -> Unit  // ignore taps during LANDING
-        }
-    }
-
-    fun onRallyPointSet(point: GeoPoint) {
-        simulator.updateRallyPoint(point)
-    }
-
-    private fun checkRallyArrival(position: GeoPoint?) {
-        val rally = _state.value.rallyPoint ?: return
-        val pos   = position ?: return
-        // arrival check is handled inside simulator,
-        // graphics clears rally at 20m — already wired in simulator
+        simulator.startRTH(self.point)
+        graphics.setRallyPoint(self.point)
     }
 
     fun onFlyToMapPoint() {
         targetingController.toggle()
     }
 
-    fun onRth() {
-
+    fun onRallyPointSet(point: GeoPoint) {
+        // if in RTH, tapping map cancels it silently
+        if (_state.value.status == FlightStatus.RTH) {
+            simulator.cancelRTH()
+        }
+        simulator.updateRallyPoint(point)
+        graphics.setRallyPoint(point)
     }
 
     fun onTargetAltitudeChanged(altitude: Int) {

@@ -34,11 +34,11 @@ class MapGraphicsManager(private val mapView: MapView) {
     private var pulseJob: Job? = null
 
     // ── Rally Point ─────────────────────────────────────────────────────────
-    fun setRallyPoint(point: GeoPointMetaData) {
+    fun setRallyPoint(point: GeoPoint) {
         if (rallyCircle == null) {
             spawnRallyCircle(point)
         } else {
-            rallyCircle!!.setCenterPoint(point)
+            rallyCircle!!.setCenterPoint(GeoPointMetaData(point))
         }
     }
 
@@ -49,9 +49,9 @@ class MapGraphicsManager(private val mapView: MapView) {
         rallyCircle = null
     }
 
-    private fun spawnRallyCircle(point: GeoPointMetaData) {
+    private fun spawnRallyCircle(point: GeoPoint) {
         rallyCircle = DrawingCircle(mapView, "fakeDRON-rally").apply {
-            setCenterPoint(point)
+            setCenterPoint(GeoPointMetaData(point))
             radius       = RALLY_BASE_RADIUS_M
             strokeColor  = RALLY_STROKE_COLOR
             fillColor    = RALLY_FILL_COLOR
