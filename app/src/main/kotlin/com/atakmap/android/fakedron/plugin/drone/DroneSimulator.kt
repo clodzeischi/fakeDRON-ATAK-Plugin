@@ -34,14 +34,13 @@ class DroneSimulator(
         const val SPAWN_OFFSET_M   = 50.0
     }
 
-    private var simulationJob: Job? = null
-    internal var actualAltitude      = 0
-    private var targetAltitude      = 0
-    private var currentPosition: GeoPoint? = null
-    private var lastPosition: GeoPoint? = null
-    private var rallyPoint: GeoPoint?      = null
+    private var simulationJob: Job?     = null
+    internal var actualAltitude         = 0
+    private var targetAltitude          = 0
+    private var currentPosition: GeoPoint?  = null
+    private var lastPosition: GeoPoint?     = null
+    private var rallyPoint: GeoPoint?       = null
 
-    private var isRTH = false
 
     fun launch(target: Int, spawnPoint: GeoPoint) {
         targetAltitude  = target
@@ -53,16 +52,6 @@ class DroneSimulator(
 
     fun land() {
         targetAltitude = 0
-        isRTH          = false  // landing always clears RTH
-    }
-
-    fun startRTH(operatorPosition: GeoPoint) {
-        isRTH      = true
-        rallyPoint = operatorPosition
-    }
-
-    fun cancelRTH() {
-        isRTH = false
     }
 
     fun updateTargetAltitude(target: Int) {
@@ -84,7 +73,6 @@ class DroneSimulator(
         currentPosition = null
         lastPosition    = null    // ← add this
         rallyPoint      = null
-        isRTH           = false
     }
 
     private fun startLoop() {
@@ -112,13 +100,12 @@ class DroneSimulator(
             targetAltitude == 0 && actualAltitude == 0 -> FlightStatus.IDLE
             targetAltitude == 0 && actualAltitude > 0  -> FlightStatus.LANDING
             actualAltitude < LAUNCH_THRESHOLD          -> FlightStatus.LAUNCHING
-            isRTH                                      -> FlightStatus.RTH
             else                                       -> FlightStatus.FLYING
         }
 
         // ── Horizontal movement (FLYING only) ────────────────────────────────
         var rallyCleared = false
-        if (newStatus == FlightStatus.FLYING || newStatus == FlightStatus.RTH) {
+        if (newStatus == FlightStatus.FLYING) {
             val rally = rallyPoint
             val pos   = currentPosition
             if (rally != null && pos != null) {
@@ -126,11 +113,6 @@ class DroneSimulator(
                 if (dist <= ARRIVAL_RADIUS_M) {
                     rallyPoint   = null
                     rallyCleared = true
-                    if (isRTH) {
-                        // arrival during RTH triggers automatic landing
-                        isRTH          = false
-                        targetAltitude = 0
-                    }
                 } else {
                     val bearing     = geoBearingTo(pos, rally)
                     currentPosition = geoPointAtDistance(

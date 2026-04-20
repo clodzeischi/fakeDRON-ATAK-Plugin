@@ -15,12 +15,10 @@
     <string name="label_status_launching">● LAUNCHING</string>
     <string name="label_status_flying">● FLYING</string>
     <string name="label_status_landing">● LANDING</string>
-    <string name="label_status_rth">● RTH</string>
     <string name="label_altitude">ALTITUDE</string>
     <string name="label_target">Target</string>
     <string name="label_actual">Actual</string>
     <string name="label_blank_alt">---m</string>
-    <string name="label_default_alt">120m</string>
     <string name="label_btn_goto">FLY TO MAP POINT</string>
     <string name="label_btn_goto_active">TAP THE MAP</string>
     <string name="label_drone_location">DRONE LOCATION</string>

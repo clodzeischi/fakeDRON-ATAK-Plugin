@@ -123,57 +123,6 @@ class DroneSimulatorTest {
         assertEquals(FlightStatus.LANDING, lastStatus)
     }
 
-    @Test
-    fun `status is RTH when isRTH is true and altitude above threshold`() {
-        simulator.launch(200, spawnPoint)
-        repeat(34) { simulator.tick() }
-        simulator.startRTH(rallyPoint)
-        simulator.tick()
-        assertEquals(FlightStatus.RTH, lastStatus)
-    }
-
-    @Test
-    fun `status is LAUNCHING not RTH when below threshold even if isRTH set`() {
-        simulator.launch(200, spawnPoint)
-        simulator.startRTH(rallyPoint)
-        simulator.tick()
-        assertEquals(FlightStatus.LAUNCHING, lastStatus)
-    }
-
-    // ── RTH flag management ───────────────────────────────────────────────────
-
-    @Test
-    fun `land() clears RTH flag`() {
-        simulator.launch(200, spawnPoint)
-        repeat(34) { simulator.tick() }
-        simulator.startRTH(rallyPoint)
-        simulator.land()
-        simulator.tick()
-        assertEquals(FlightStatus.LANDING, lastStatus)
-    }
-
-    @Test
-    fun `cancelRTH() switches status back to FLYING`() {
-        simulator.launch(200, spawnPoint)
-        repeat(34) { simulator.tick() }
-        simulator.startRTH(rallyPoint)
-        simulator.cancelRTH()
-        simulator.tick()
-        assertEquals(FlightStatus.FLYING, lastStatus)
-    }
-
-    @Test
-    fun `RTH arrival triggers auto land`() {
-        simulator = buildSimulator(distanceTo = 5.0)  // within arrival radius
-
-        simulator.launch(200, spawnPoint)
-        repeat(34) { simulator.tick() }
-        simulator.startRTH(rallyPoint)
-        simulator.tick()   // arrives — targetAltitude set to 0
-        simulator.tick()   // now descending
-        assertEquals(FlightStatus.LANDING, lastStatus)
-    }
-
     // ── Rally arrival ─────────────────────────────────────────────────────────
 
     @Test

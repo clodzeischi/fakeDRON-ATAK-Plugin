@@ -2,7 +2,7 @@ package com.atakmap.android.fakedron.plugin.drone
 
 import com.atakmap.coremap.maps.coords.GeoPoint
 
-enum class FlightStatus { IDLE, LAUNCHING, FLYING, LANDING, RTH }
+enum class FlightStatus { IDLE, LAUNCHING, FLYING, LANDING }
 
 data class DroneState(
     val status: FlightStatus = FlightStatus.IDLE,

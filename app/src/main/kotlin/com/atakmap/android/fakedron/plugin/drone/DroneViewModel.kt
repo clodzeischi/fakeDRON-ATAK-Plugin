@@ -20,7 +20,13 @@ import kotlinx.coroutines.flow.asStateFlow
 class DroneViewModel(
     private val mapView: MapView,
     private val graphics: MapGraphicsManager,
-    broadcaster: CotBroadcaster
+    broadcaster: CotBroadcaster,
+    private val findSelf: () -> GeoPoint? = {
+        ATAKUtilities.findSelf(mapView)?.point?.takeIf { it.isValid }
+    },
+    private val getNoPositionMessage: () -> String = {
+        mapView.context.getString(R.string.toast_no_position)
+    }
 ) {
     private val viewModelScope = MainScope()
 
@@ -73,19 +79,18 @@ class DroneViewModel(
     fun onLaunchLand() {
         when (_state.value.status) {
             FlightStatus.IDLE -> {
-                val self = ATAKUtilities.findSelf(mapView)
-                if (self == null || !self.point.isValid) {
-                    _toastMessage.value = mapView.context.getString(R.string.toast_no_position)
+                val selfPoint = findSelf()
+                if (selfPoint == null) {
+                    _toastMessage.value = getNoPositionMessage()
                     return
                 }
-                val spawnPoint = simulator.spawnOffset(self.point)
+                val spawnPoint = simulator.spawnOffset(selfPoint)
                 graphics.spawnDroneMarker(spawnPoint)
                 simulator.launch(_state.value.targetAltitude, spawnPoint)
             }
 
             FlightStatus.FLYING,
-            FlightStatus.LAUNCHING,
-            FlightStatus.RTH -> {      // ← RTH also responds to LAND
+            FlightStatus.LAUNCHING -> {
                 simulator.land()
                 simulator.clearRallyPoint()
                 graphics.clearRallyPoint()
@@ -98,30 +103,22 @@ class DroneViewModel(
         }
     }
 
-    fun onRth() {
-        val self = ATAKUtilities.findSelf(mapView)
-        if (self == null || !self.point.isValid) {
-            _toastMessage.value = mapView.context.getString(R.string.toast_no_position)
-            return
-        }
-        simulator.startRTH(self.point)
-        graphics.setRallyPoint(self.point)
-    }
-
     fun onFlyToMapPoint() {
-        if (_state.value.status == FlightStatus.RTH) {
-            simulator.cancelRTH()
-        }
         targetingController.toggle()
     }
 
     fun onRallyPointSet(point: GeoPoint) {
-        // if in RTH, tapping map cancels it silently
-        if (_state.value.status == FlightStatus.RTH) {
-            simulator.cancelRTH()
-        }
         simulator.updateRallyPoint(point)
         graphics.setRallyPoint(point)
+    }
+
+    fun onRth() {
+        val selfPoint = findSelf()
+        if (selfPoint == null) {
+            _toastMessage.value = getNoPositionMessage()
+            return
+        }
+        onRallyPointSet(selfPoint)
     }
 
     fun onTargetAltitudeChanged(altitude: Int) {

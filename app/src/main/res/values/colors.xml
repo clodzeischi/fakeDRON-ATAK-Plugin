@@ -3,18 +3,13 @@
     <color name="white">#ffffff</color>
     <color name="darker_gray">#121212</color>
     <color name="heading_yellow">#dfb228</color>
-    <color name="background">#1a1a1a</color>
-    <color name="background_btn">#1565C0</color>
-    <color name="background_btn_active">#2E7D32</color>
-    <color name="header">#ffffff</color>
     <color name="text_primary">#ffffff</color>
-    <color name="text_secondary">#9E9E9E</color>
-    <color name="text_tertiary">#78C1F3</color>
-    <color name="idle">#9E9E9E</color>
-    <color name="launching">#F9A825</color>
-    <color name="flying">#2E7D32</color>
-    <color name="landing">#F9A825</color>
-    <color name="rth">#B71C1C</color>
-    <color name="circle_fill">#33FF6D00</color>
-    <color name="circle_stroke">#FF6D00</color>
+    <color name="text_subdued">#9E9E9E</color>
+    <color name="text_important">#78C1F3</color>
+    <color name="text_caution">#F9A825</color>
+    <color name="text_error">#F44336</color>
+    <color name="background">#1a1a1a</color>
+    <color name="background_primary">#1565C0</color>
+    <color name="background_important">#F9A825</color>
+    <color name="circle_fill">#33F9A825</color>
 </resources>

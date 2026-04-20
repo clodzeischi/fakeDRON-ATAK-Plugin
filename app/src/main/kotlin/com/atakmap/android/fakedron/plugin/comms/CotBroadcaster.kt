@@ -1,7 +1,6 @@
 package com.atakmap.android.fakedron.plugin.comms
 
 import com.atakmap.android.cot.CotMapComponent
-import com.atakmap.android.maps.MapView
 import com.atakmap.coremap.cot.event.CotDetail
 import com.atakmap.coremap.cot.event.CotEvent
 import com.atakmap.coremap.cot.event.CotPoint
@@ -11,8 +10,6 @@ import com.atakmap.coremap.maps.time.CoordinatedTime
 class CotBroadcaster(deviceUid: String) {
 
     private val uid = "fakeDRON-$deviceUid"
-
-    // rest unchanged
 
     companion object {
         const val BROADCAST_INTERVAL_MS  = 60_000L   // 60s max time gate

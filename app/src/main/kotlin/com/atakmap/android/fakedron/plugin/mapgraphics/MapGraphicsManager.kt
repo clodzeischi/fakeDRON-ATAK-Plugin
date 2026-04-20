@@ -101,7 +101,7 @@ class MapGraphicsManager(private val mapView: MapView) {
     }
 
     private fun Marker.updateLabel(altitude: Int) {
-        setMetaString("callsign", DRONE_CALLSIGN + System.lineSeparator() + altitude + "m")
+        setMetaString("callsign", DRONE_CALLSIGN)
     }
 
     fun cleanup() {

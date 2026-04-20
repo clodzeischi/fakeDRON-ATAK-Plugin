@@ -89,19 +89,16 @@ class DroneControlView(
     private fun updateStatusChip(status: FlightStatus) {
         val (label, color) = when (status) {
             FlightStatus.IDLE ->
-                context.getString(R.string.label_status_idle) to context.getColor(R.color.idle)
+                context.getString(R.string.label_status_idle) to context.getColor(R.color.text_subdued)
 
             FlightStatus.LAUNCHING ->
-                context.getString(R.string.label_status_launching) to context.getColor(R.color.launching)
+                context.getString(R.string.label_status_launching) to context.getColor(R.color.text_caution)
 
             FlightStatus.FLYING ->
-                context.getString(R.string.label_status_flying) to context.getColor(R.color.flying)
+                context.getString(R.string.label_status_flying) to context.getColor(R.color.text_important)
 
             FlightStatus.LANDING ->
-                context.getString(R.string.label_status_landing) to context.getColor(R.color.landing)
-
-            FlightStatus.RTH ->
-                context.getString(R.string.label_status_rth) to context.getColor(R.color.rth)
+                context.getString(R.string.label_status_landing) to context.getColor(R.color.text_caution)
         }
         tvDroneState.text = label
         tvDroneState.setTextColor(color)
@@ -112,10 +109,10 @@ class DroneControlView(
         val (label, color) = when (status) {
             FlightStatus.IDLE,
             FlightStatus.LANDING -> context.getString(R.string.label_btn_launch) to context.getColor(
-                R.color.launching
+                R.color.text_caution
             )
 
-            else -> context.getString(R.string.label_btn_land) to context.getColor(R.color.landing)
+            else -> context.getString(R.string.label_btn_land) to context.getColor(R.color.text_caution)
         }
         btnLaunchLand.text = label
         btnLaunchLand.backgroundTintList = ColorStateList.valueOf(color)
@@ -124,17 +121,17 @@ class DroneControlView(
         btnLaunchLand.isEnabled = status != FlightStatus.LANDING
 
         // RTH active when FLYING or already in RTH
-        val rthEnabled = status == FlightStatus.FLYING || status == FlightStatus.RTH
+        val rthEnabled = status == FlightStatus.FLYING
         btnRth.isEnabled = rthEnabled
         btnRth.alpha = if (rthEnabled) 1.0f else 0.4f
 
         // goto — FLYING and RTH, disabled during RTH only blocks map interaction
-        val gotoEnabled = status == FlightStatus.FLYING || status == FlightStatus.RTH
+        val gotoEnabled = status == FlightStatus.FLYING
         btnGoto.isEnabled = gotoEnabled
         btnGoto.alpha = if (gotoEnabled) 1.0f else 0.4f
 
         // slider — disabled during LANDING and RTH
-        val sliderEnabled = status != FlightStatus.LANDING && status != FlightStatus.RTH
+        val sliderEnabled = status != FlightStatus.LANDING
         sbAltitude.isEnabled = sliderEnabled
         sbAltitude.alpha = if (sliderEnabled) 1.0f else 0.4f
     }
@@ -144,11 +141,11 @@ class DroneControlView(
     private fun updateGotoButton(isTargeting: Boolean) {
         val (label, color) = if (isTargeting) {
             context.getString(R.string.label_btn_goto_active) to context.getColor(
-                R.color.background_btn_active
+                R.color.background_important
             )
         } else {
             context.getString(R.string.label_btn_goto) to context.getColor(
-                R.color.background_btn
+                R.color.background_primary
             )
         }
         btnGoto.text = label
