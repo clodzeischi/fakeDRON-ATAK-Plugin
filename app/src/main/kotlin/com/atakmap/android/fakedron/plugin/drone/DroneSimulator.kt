@@ -26,8 +26,8 @@ class DroneSimulator(
     }
 ) {
     companion object {
-        const val ALTITUDE_STEP_M  = 3
-        const val MOVEMENT_STEP_M  = 3.0
+        const val ALTITUDE_STEP_M  = 1
+        const val MOVEMENT_STEP_M  = 1.0
         const val TICK_MS          = 16L
         const val LAUNCH_THRESHOLD = 100
         const val ARRIVAL_RADIUS_M = 20.0
